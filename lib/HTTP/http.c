@@ -1,34 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <HTTP/http.h>
 #include <socket/handlers.h>
 #include <helpers/helpers.h>
-
-
-char *generate_request_message(struct URL_Components* components) {
-  char *buffer = malloc(MAX_MSG);
-  if (!buffer)
-    return NULL;
-
-  const char* format = ("%s /%s?%s HTTP/1.1\r\n"
-    "User-Agent: api_tester/0.1\r\n"
-    "Host: %s\r\n"
-    "Accept: */*\r\n"
-    "\r\n");
-
-  if (components->port) {
-    char* host_with_port;
-    strcpy(host_with_port, components->host);
-    strcat(host_with_port, ":");
-    strcat(host_with_port, components->port);
-    sprintf(buffer, format, "GET", components->path, components->query, host_with_port);
-  } else {
-    sprintf(buffer, format, "GET", components->path, components->query, components->host);
-  }
-
-  return buffer;
-}
 
 int read_from_client(int filedes) {
   char buffer[MAX_MSG];
@@ -52,7 +24,65 @@ int read_from_client(int filedes) {
   }
 }
 
-int make_get_request(struct URL_Components* components, char *message) {
+char *generate_get_request_message(struct URL_Components* components) {
+  char *buffer = malloc(MAX_MSG);
+  if (!buffer)
+    return NULL;
+
+  const char* format = ("GET /%s?%s HTTP/1.1\r\n"
+    "User-Agent: api_tester/0.1\r\n"
+    "Host: %s\r\n"
+    "Accept: */*\r\n"
+    "\r\n");
+
+  if (components->port) {
+    char* host_with_port;
+    strcpy(host_with_port, components->host);
+    strcat(host_with_port, ":");
+    strcat(host_with_port, components->port);
+    sprintf(buffer, format, components->path, components->query, host_with_port);
+  } else {
+    sprintf(buffer, format,  components->path, components->query, components->host);
+  }
+
+  return buffer;
+}
+
+char *generate_post_request_message(
+  struct URL_Components* components,
+  char *headers,
+  char *data,
+  size_t data_len
+) {
+  char *buffer = malloc(MAX_MSG);
+  if (!buffer)
+    return NULL;
+
+  const char* format = ("POST /%s HTTP/1.1\r\n"
+    "Host: %s\r\n"
+    "User-Agent: api_tester/0.1\r\n"
+    "Accept: */*\r\n"
+    "Content-Length: %d\r\n"
+    "Content-Type: application/json\r\n"
+    "Connection: close\r\n"
+    "%s"
+    "\r\n"
+    "%s");
+
+  if (components->port) {
+    char* host_with_port;
+    strcpy(host_with_port, components->host);
+    strcat(host_with_port, ":");
+    strcat(host_with_port, components->port);
+    sprintf(buffer, format, components->path, host_with_port, data_len, headers, data);
+  } else {
+    sprintf(buffer, format,  components->path, components->host, data_len, headers, data);
+  }
+
+  return buffer;
+}
+
+int make_http_request(struct URL_Components* components, char *message) {
   int sock, port, nbytes;
   socklen_t size;
   struct sockaddr_in servername;
@@ -78,9 +108,7 @@ int make_get_request(struct URL_Components* components, char *message) {
     exit(EXIT_FAILURE);
   }
 
-  while(read_from_client(sock) != 0) {
-    continue;
-  }
+  read_from_socket(sock);
 
   return 0;
 }

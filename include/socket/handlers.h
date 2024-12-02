@@ -22,4 +22,7 @@ void init_sockaddr(struct sockaddr_in *name,
                   const char *hostname,
                   uint16_t port);
 
+
+void read_from_socket(int sock);
+
 #endif

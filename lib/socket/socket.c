@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -33,4 +34,24 @@ int create_socket() {
   }
 
   return ret;
+}
+
+void read_from_socket(int sock) {
+  char buffer[4096];
+  int total_bytes = 0;
+  int bytes_received;
+
+  memset(buffer, 0, sizeof(buffer));
+
+  while ((bytes_received = recv(sock, buffer + total_bytes,
+      sizeof(buffer) - total_bytes, 0)) > 0) {
+    total_bytes += bytes_received;
+    buffer[total_bytes] = '\0';
+
+    if (strstr(buffer, "\r\n\r\n") != NULL) {
+      break;
+    }
+  }
+
+  printf("%s", buffer);
 }
