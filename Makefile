@@ -18,7 +18,7 @@ INCLUDE_DIRS = $(shell find $(INCLUDE_DIR) -type d)
 CFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
 
 # Output executable
-TARGET = myProgram
+TARGET = petito
 
 # Rule to compile everything
 all: $(TARGET)

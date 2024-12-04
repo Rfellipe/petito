@@ -10,6 +10,10 @@ struct URL_Components {
   char* fragment;
 };
 
+char* get_full_path(const struct URL_Components* components);
+
+char* get_host_with_port(const struct URL_Components* components);
+
 // parse url given in arguments
 struct URL_Components* url_parser(char *url);
 

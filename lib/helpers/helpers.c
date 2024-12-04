@@ -1,6 +1,47 @@
 #include <helpers/helpers.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+char* str_concat(const char* str1, const char* separator, const char* str2) {
+    if (!str1) return str2 ? strdup(str2) : NULL;
+    if (!str2) return strdup(str1);
+
+    size_t len = strlen(str1) + strlen(separator) + strlen(str2) + 1;
+    char* result = malloc(len);
+    if (result) {
+        snprintf(result, len, "%s%s%s", str1, separator, str2);
+    }
+    return result;
+}
+
+char* get_full_path(const struct URL_Components* components) {
+    if (!components) return NULL;
+
+    // If there's no path and no query, return NULL
+    if (!components->path && !components->query) return NULL;
+
+    // If there's only a path, return it
+    if (components->path && !components->query) return strdup(components->path);
+
+    // If there's only a query, return it with leading ?
+    if (!components->path && components->query) {
+        return str_concat("", "?", components->query);
+    }
+
+    // If both exist, combine them
+    return str_concat(components->path, "?", components->query);
+}
+
+char* get_host_with_port(const struct URL_Components* components) {
+    if (!components || !components->host) return NULL;
+
+    // If there's no port, return just the host
+    if (!components->port) return strdup(components->host);
+
+    // Combine host and port with :
+    return str_concat(components->host, ":", components->port);
+}
 
 struct URL_Components* url_parser(char *url) {
   struct URL_Components* components = calloc(1, sizeof(struct URL_Components));
