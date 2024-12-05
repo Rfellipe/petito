@@ -16,31 +16,25 @@ char* str_concat(const char* str1, const char* separator, const char* str2) {
 }
 
 char* get_full_path(const struct URL_Components* components) {
-    if (!components) return NULL;
+  if (!components) return NULL;
 
-    // If there's no path and no query, return NULL
-    if (!components->path && !components->query) return NULL;
+  if (!components->path && !components->query) return NULL;
 
-    // If there's only a path, return it
-    if (components->path && !components->query) return strdup(components->path);
+  if (components->path && !components->query) return strdup(components->path);
 
-    // If there's only a query, return it with leading ?
-    if (!components->path && components->query) {
-        return str_concat("", "?", components->query);
-    }
+  if (!components->path && components->query) {
+    return str_concat("", "?", components->query);
+  }
 
-    // If both exist, combine them
-    return str_concat(components->path, "?", components->query);
+  return str_concat(components->path, "?", components->query);
 }
 
 char* get_host_with_port(const struct URL_Components* components) {
-    if (!components || !components->host) return NULL;
+  if (!components || !components->host) return NULL;
 
-    // If there's no port, return just the host
-    if (!components->port) return strdup(components->host);
+  if (!components->port) return strdup(components->host);
 
-    // Combine host and port with :
-    return str_concat(components->host, ":", components->port);
+  return str_concat(components->host, ":", components->port);
 }
 
 struct URL_Components* url_parser(char *url) {
@@ -84,8 +78,6 @@ struct URL_Components* url_parser(char *url) {
   }
 
   components->host = strdup(cursor);
-
-  // printf("/%s?%s", components->path, components->query);
 
   free(temp);
   return components;
