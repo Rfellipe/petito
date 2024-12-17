@@ -94,3 +94,12 @@ void free_url_components(struct URL_Components* components) {
     free(components);
   }
 }
+
+void print_url_components(struct URL_Components* components) {
+  printf("scheme %s\n", components->scheme);
+  printf("host %s\n", components->host);
+  printf("port %s\n", components->port);
+  printf("path %s\n", components->path);
+  printf("query %s\n", components->query);
+  printf("fragment %s\n", components->fragment);
+}

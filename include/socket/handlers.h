@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <openssl/bio.h>
 
 /**
  * Initializes a socket address structure with the given hostname and port.
@@ -45,5 +46,7 @@ int create_socket(void);
  * @note Maximum buffer size is 4096 bytes
  */
 void read_from_socket(int sock);
+
+BIO *create_bio_socket(char *hostname, char *port);
 
 #endif

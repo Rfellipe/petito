@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
       {"verbose", no_argument, &verbose_flag, 0},
       {"post", no_argument, &post_flag, 1},
       {"post", no_argument, &post_flag, 0},
-      {"header", required_argument, NULL, 'h'},
+      {"header", required_argument, NULL, 'H'},
       {"data", required_argument, NULL, 'd'},
       {"url", required_argument, NULL, 'u'},
       {0, 0, 0, 0}
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
   while (1) {
     int opt_index = 0;
-    opt = getopt_long(argc, argv, "h:d:xv", long_options, &opt_index);
+    opt = getopt_long(argc, argv, "d:H:u:xv", long_options, &opt_index);
 
     if (opt == -1)
       break;
@@ -43,13 +43,13 @@ int main(int argc, char **argv) {
         printf ("\n");
         break;
 
-      case 'h':
-        post_flag = 1;
+      case 'H':
         strcat(headers, optarg);
         strcat(headers, "\r\n");
         break;
 
       case 'd':
+        post_flag = 1;
         data = strdup(optarg);
         break;
 
@@ -85,12 +85,15 @@ int main(int argc, char **argv) {
     message = generate_get_request_message(components);
   }
 
-  printf("%s\n", message);
+    ret = make_https_request(components, message);
+    if (ret != 0) {
+      printf("Error making request (%d)", ret);
+    }
+    // ret = make_http_request(components, message);
+    // if (ret != 0) {
+    //   perror("Error making request");
+    // }
 
-  ret = make_http_request(components, message);
-  if (ret != 0) {
-    perror("Error making request");
-  }
 
   return 0;
 }

@@ -1,6 +1,13 @@
 #include <HTTP/http.h>
+#include <openssl/prov_ssl.h>
+#include <openssl/ssl.h>
+#include <openssl/tls1.h>
+#include <openssl/x509.h>
+#include <sys/types.h>
 #include <socket/handlers.h>
 #include <helpers/helpers.h>
+#include <openssl/types.h>
+#include <openssl/bio.h>
 
 char *generate_get_request_message(struct URL_Components* components) {
   char *full_path = get_full_path(components);
@@ -13,6 +20,7 @@ char *generate_get_request_message(struct URL_Components* components) {
     "User-Agent: api_tester/0.1\r\n"
     "Host: %s\r\n"
     "Accept: */*\r\n"
+    "Connection: close\r\n"
     "\r\n"
   );
 
@@ -54,6 +62,8 @@ int make_http_request(struct URL_Components* components, char *message) {
   socklen_t size;
   struct sockaddr_in servername;
 
+  printf("making http request\n");
+
   if (components->port) {
     port = strtol(components->port, NULL, 10);
   } else {
@@ -78,4 +88,83 @@ int make_http_request(struct URL_Components* components, char *message) {
   read_from_socket(sock);
 
   return 0;
+}
+
+int make_https_request(struct URL_Components* components, char *message) {
+  char buf[1024];
+  size_t written;
+  size_t nbytes;
+  SSL_CTX *ctx;
+  SSL *ssl;
+  BIO *bio;
+
+  // Creates a new SSL context to use SSL objects
+  ctx = SSL_CTX_new(TLS_client_method());
+  if (ctx == NULL) {
+    printf("failed to create the SSL_CTX\n");
+    return -1;
+  }
+
+  // Verify the handshake if the verification fails
+  // it aborts the handshake
+  SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+
+  if (!SSL_CTX_set_default_verify_paths(ctx)) {
+    printf("Failed to set the default trusted certificate store\n");
+    return -2;
+  }
+
+  // Set minimal version of TLS to TLS_1.2
+  if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
+    printf("Failed to set the minimum TLS protocol version\n");
+    return -3;
+  }
+
+  // Create an SSL object to represent the TLS connection
+  ssl = SSL_new(ctx);
+  if (ssl == NULL) {
+    printf("Failed to create SSL obj");
+    return -4;
+  }
+
+  bio = create_bio_socket(components->host, components->port);
+
+  SSL_set_bio(ssl, bio, bio);
+
+  if (!SSL_set_tlsext_host_name(ssl, components->host)) {
+    printf("Failed to set the SNI hostname\n");
+    return -4;
+  }
+
+  if (!SSL_set1_host(ssl, components->host)) {
+    printf("Failed to set the certificate verification hostname");
+    return -5;
+  }
+
+  int ret = SSL_connect(ssl);
+
+  if (ret < 1) {
+    printf("Failed to connect to the server, (%d)\n", ret);
+    int err = SSL_get_error(ssl, ret);
+
+    if (SSL_get_verify_result(ssl) != X509_V_OK)  {
+      printf("Verify error: %s\n",
+        X509_verify_cert_error_string(SSL_get_verify_result(ssl)));
+    }
+
+  }
+
+  printf("%s\n", message);
+  if (!SSL_write_ex(ssl, message, strlen(message), &written)) {
+    printf("Failed to write message\n");
+    return -6;
+  }
+
+  while (SSL_read_ex(ssl, buf, sizeof(buf), &nbytes)) {
+    printf("%s", buf);
+  }
+
+  printf("\n");
+
+  return 1;
 }

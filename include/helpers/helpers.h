@@ -38,4 +38,6 @@ struct URL_Components* url_parser(char *url);
 // free the memory in the component struct
 void free_url_components(struct URL_Components* components);
 
+void print_url_components(struct URL_Components* components);
+
 #endif

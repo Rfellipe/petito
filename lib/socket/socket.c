@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <openssl/bio.h>
 #include <socket/handlers.h>
 
 void init_sockaddr(struct sockaddr_in *name,
@@ -38,6 +40,7 @@ int create_socket() {
 
 void read_from_socket(int sock) {
   char buffer[4096];
+  char *data;
   int total_bytes = 0;
   int bytes_received;
 
@@ -48,10 +51,51 @@ void read_from_socket(int sock) {
     total_bytes += bytes_received;
     buffer[total_bytes] = '\0';
 
-    if (strstr(buffer, "\r\n\r\n") != NULL) {
+    data = strstr(buffer, "\r\n\r\n");
+    if (data != NULL) {
       break;
     }
   }
 
-  printf("%s", buffer);
+  printf("%s\n", data);
+}
+
+BIO *create_bio_socket(char *hostname, char *port) {
+  BIO *bio;
+  BIO_ADDRINFO *res;
+  int sock = -1;
+  const BIO_ADDRINFO *ai = NULL;
+
+  if (!port)
+    port = "80";
+
+  if (!BIO_lookup_ex(hostname, port, BIO_LOOKUP_CLIENT, PF_INET, SOCK_STREAM, 0, &res))
+    return NULL;
+
+  for (ai = res; ai != NULL; ai = BIO_ADDRINFO_next(ai)) {
+    sock = BIO_socket(BIO_ADDRINFO_family(ai), SOCK_STREAM, 0, 0);
+    if (sock == -1) {
+      continue;
+    }
+
+    if (!BIO_connect(sock, BIO_ADDRINFO_address(ai), BIO_SOCK_NODELAY)) {
+      BIO_closesocket(sock);
+      sock = -1;
+      continue;
+    }
+
+    break;
+  }
+
+  BIO_ADDRINFO_free(res);
+
+  bio = BIO_new(BIO_s_socket());
+  if (bio == NULL) {
+    BIO_closesocket(sock);
+    return NULL;
+  }
+
+  BIO_set_fd(bio, sock, BIO_CLOSE);
+
+  return bio;
 }

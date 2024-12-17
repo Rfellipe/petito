@@ -38,4 +38,6 @@ char *generate_post_request_message(
  */
 int make_http_request(struct URL_Components* components, char *message);
 
+int make_https_request(struct URL_Components* components, char *message);
+
 #endif

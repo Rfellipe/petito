@@ -1,6 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -I./include
+LDFLAGS = -lssl -lcrypto
 
 # Directories
 LIB_DIR = lib
@@ -25,7 +26,7 @@ all: $(TARGET)
 
 # Rule to link the object files with main.c
 $(TARGET): $(OBJ_FILES) main.o
-	$(CC) -o $(TARGET) main.o $(OBJ_FILES)
+	$(CC) -o $(TARGET) main.o $(OBJ_FILES) $(LDFLAGS)
 
 # Rule to compile main.c
 main.o: main.c
