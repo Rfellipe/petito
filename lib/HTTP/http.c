@@ -3,6 +3,7 @@
 #include <openssl/ssl.h>
 #include <openssl/tls1.h>
 #include <openssl/x509.h>
+#include <openssl/err.h>
 #include <sys/types.h>
 #include <socket/handlers.h>
 #include <helpers/helpers.h>
@@ -62,8 +63,6 @@ int make_http_request(struct URL_Components* components, char *message) {
   socklen_t size;
   struct sockaddr_in servername;
 
-  printf("making http request\n");
-
   if (components->port) {
     port = strtol(components->port, NULL, 10);
   } else {
@@ -91,9 +90,11 @@ int make_http_request(struct URL_Components* components, char *message) {
 }
 
 int make_https_request(struct URL_Components* components, char *message) {
-  char buf[1024];
+  char buf[4096];
   size_t written;
   size_t nbytes;
+  int total_bytes = 0;
+
   SSL_CTX *ctx;
   SSL *ssl;
   BIO *bio;
@@ -115,7 +116,7 @@ int make_https_request(struct URL_Components* components, char *message) {
   }
 
   // Set minimal version of TLS to TLS_1.2
-  if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
+  if (!SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION)) {
     printf("Failed to set the minimum TLS protocol version\n");
     return -3;
   }
@@ -144,27 +145,19 @@ int make_https_request(struct URL_Components* components, char *message) {
   int ret = SSL_connect(ssl);
 
   if (ret < 1) {
-    printf("Failed to connect to the server, (%d)\n", ret);
+    printf("Failed to connect to the server (%d)\n", ret);
+
     int err = SSL_get_error(ssl, ret);
-
-    if (SSL_get_verify_result(ssl) != X509_V_OK)  {
-      printf("Verify error: %s\n",
-        X509_verify_cert_error_string(SSL_get_verify_result(ssl)));
-    }
-
+    
+    return err;
   }
 
-  printf("%s\n", message);
   if (!SSL_write_ex(ssl, message, strlen(message), &written)) {
     printf("Failed to write message\n");
     return -6;
   }
 
-  while (SSL_read_ex(ssl, buf, sizeof(buf), &nbytes)) {
-    printf("%s", buf);
-  }
-
-  printf("\n");
+  read_from_BIO_socket(ssl);
 
   return 1;
 }

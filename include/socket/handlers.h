@@ -47,6 +47,8 @@ int create_socket(void);
  */
 void read_from_socket(int sock);
 
+void read_from_BIO_socket(SSL *ssl);
+
 BIO *create_bio_socket(char *hostname, char *port);
 
 #endif

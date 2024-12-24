@@ -2,3 +2,8 @@
 *.o
 **/notes
 petito
+*.plist
+**/.cache
+**/.ccls-cache
+.clangd
+

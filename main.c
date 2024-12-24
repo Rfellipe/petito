@@ -85,15 +85,19 @@ int main(int argc, char **argv) {
     message = generate_get_request_message(components);
   }
 
+  free(data);
+
+  if (strcmp(components->scheme, "https") == 0) {
     ret = make_https_request(components, message);
-    if (ret != 0) {
+    if (ret <= 0) {
       printf("Error making request (%d)", ret);
     }
-    // ret = make_http_request(components, message);
-    // if (ret != 0) {
-    //   perror("Error making request");
-    // }
-
+  } else {
+    ret = make_http_request(components, message);
+    if (ret != 0) {
+      perror("Error making request");
+    }
+  }
 
   return 0;
 }
