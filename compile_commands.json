@@ -4,64 +4,47 @@
       "/usr/bin/gcc",
       "-I./include",
       "-Iinclude",
-      "-Iinclude/socket",
       "-Iinclude/helpers",
-      "-Iinclude/HTTP",
-      "-c",
-      "-o",
-      "obj/socket/socket.o",
-      "lib/socket/socket.c"
-    ],
-    "directory": "/home/fellipe/Projects/C/petito",
-    "file": "/home/fellipe/Projects/C/petito/lib/socket/socket.c",
-    "output": "/home/fellipe/Projects/C/petito/obj/socket/socket.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include",
-      "-Iinclude",
       "-Iinclude/socket",
-      "-Iinclude/helpers",
       "-Iinclude/HTTP",
       "-c",
       "-o",
       "obj/helpers/helpers.o",
       "lib/helpers/helpers.c"
     ],
-    "directory": "/home/fellipe/Projects/C/petito",
-    "file": "/home/fellipe/Projects/C/petito/lib/helpers/helpers.c",
-    "output": "/home/fellipe/Projects/C/petito/obj/helpers/helpers.o"
+    "directory": "/home/fellipe/projects/C/petito",
+    "file": "/home/fellipe/projects/C/petito/lib/helpers/helpers.c",
+    "output": "/home/fellipe/projects/C/petito/obj/helpers/helpers.o"
   },
   {
     "arguments": [
       "/usr/bin/gcc",
       "-I./include",
       "-Iinclude",
-      "-Iinclude/socket",
       "-Iinclude/helpers",
+      "-Iinclude/socket",
       "-Iinclude/HTTP",
       "-c",
       "-o",
       "obj/HTTP/http.o",
       "lib/HTTP/http.c"
     ],
-    "directory": "/home/fellipe/Projects/C/petito",
-    "file": "/home/fellipe/Projects/C/petito/lib/HTTP/http.c",
-    "output": "/home/fellipe/Projects/C/petito/obj/HTTP/http.o"
+    "directory": "/home/fellipe/projects/C/petito",
+    "file": "/home/fellipe/projects/C/petito/lib/HTTP/http.c",
+    "output": "/home/fellipe/projects/C/petito/obj/HTTP/http.o"
   },
   {
     "arguments": [
       "/usr/bin/gcc",
       "-I./include",
       "-Iinclude",
-      "-Iinclude/socket",
       "-Iinclude/helpers",
+      "-Iinclude/socket",
       "-Iinclude/HTTP",
       "-c",
       "main.c"
     ],
-    "directory": "/home/fellipe/Projects/C/petito",
-    "file": "/home/fellipe/Projects/C/petito/main.c"
+    "directory": "/home/fellipe/projects/C/petito",
+    "file": "/home/fellipe/projects/C/petito/main.c"
   }
 ]

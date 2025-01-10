@@ -115,12 +115,15 @@ BIO *create_bio_socket(char *hostname, char *port) {
   BIO *bio;
   BIO_ADDRINFO *res;
   int sock = -1;
-  const BIO_ADDRINFO *ai = NULL;
+
+  // Address Info
+  const BIO_ADDRINFO *ai = NULL; 
 
   if (!port)
     port = "443";
 
-  if (!BIO_lookup_ex(hostname, port, BIO_LOOKUP_CLIENT, PF_INET, SOCK_STREAM, 0, &res))
+  if (!BIO_lookup_ex(hostname, port, BIO_LOOKUP_CLIENT,
+        PF_INET, SOCK_STREAM, 0, &res))
     return NULL;
 
   for (ai = res; ai != NULL; ai = BIO_ADDRINFO_next(ai)) {

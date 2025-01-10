@@ -103,3 +103,12 @@ void print_url_components(struct URL_Components* components) {
   printf("query %s\n", components->query);
   printf("fragment %s\n", components->fragment);
 }
+
+void upper_string(char *str) {
+  while (*str != '\0') {
+    if (*str >= 'a' && *str <= 'z') {
+      *str = *str - ('a' - 'A');
+    }
+    str++;
+  }
+}

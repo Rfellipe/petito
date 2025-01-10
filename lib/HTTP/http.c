@@ -4,47 +4,51 @@
 #include <openssl/tls1.h>
 #include <openssl/x509.h>
 #include <openssl/err.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <socket/handlers.h>
 #include <helpers/helpers.h>
 #include <openssl/types.h>
 #include <openssl/bio.h>
 
-char *generate_get_request_message(struct URL_Components* components) {
-  char *full_path = get_full_path(components);
-  char *host_with_port = get_host_with_port(components);
-  char *buffer = malloc(MAX_MSG);
-  if (!buffer)
-    return NULL;
-
-  const char* format = ("GET /%s HTTP/1.1\r\n"
-    "User-Agent: api_tester/0.1\r\n"
-    "Host: %s\r\n"
-    "Accept: */*\r\n"
-    "Connection: close\r\n"
-    "\r\n"
-  );
-
-  sprintf(buffer, format, full_path, host_with_port);
-
-  return buffer;
-}
-
-char *generate_post_request_message(
-  struct URL_Components* components,
+char *generate_request_message(
+  struct URL_Components *url_components,
+  char *method,
   char *headers,
   char *data,
   size_t data_len
 ) {
-  char *full_path = get_full_path(components);
-  char *host_with_port = get_host_with_port(components);
+  char *full_path = get_full_path(url_components);
+  if (full_path == NULL) 
+    full_path = "";
+
+  char *host_with_port = get_host_with_port(url_components);
+  char *format = NULL;
   char *buffer = malloc(MAX_MSG);
-  if (!buffer)
+  if (!buffer) 
     return NULL;
 
-  const char* format = ("POST /%s HTTP/1.1\r\n"
+  if ((strcmp(method, "GET") == 0) || 
+      strcmp(method, "HEAD") == 0)
+  {
+    format = ("%s /%s HTTP/1.1\r\n"
+      "User-Agent: petito/%s\r\n"
+      "Host: %s\r\n"
+      "Accept: */*\r\n"
+      "Connection: close\r\n"
+      "\r\n"
+    );
+
+    sprintf(buffer, format, method, full_path, "1.0", host_with_port);
+
+    
+    return buffer;
+  }
+
+  format = ("%s /%s HTTP/1.1\r\n"
+    "User-Agent: petito/%s\r\n"
     "Host: %s\r\n"
-    "User-Agent: api_tester/0.1\r\n"
     "Accept: */*\r\n"
     "Content-Length: %d\r\n"
     "Connection: close\r\n"
@@ -53,7 +57,7 @@ char *generate_post_request_message(
     "%s"
   );
 
-  sprintf(buffer, format, full_path, host_with_port, data_len, headers, data);
+  sprintf(buffer, format, method, full_path, "1.0", host_with_port, data_len, headers, data);
 
   return buffer;
 }
@@ -129,17 +133,21 @@ int make_https_request(struct URL_Components* components, char *message) {
   }
 
   bio = create_bio_socket(components->host, components->port);
+  if (bio == NULL) {
+    perror("Error creationg BIO Socket");
+    return -5;
+  }
 
   SSL_set_bio(ssl, bio, bio);
 
   if (!SSL_set_tlsext_host_name(ssl, components->host)) {
     printf("Failed to set the SNI hostname\n");
-    return -4;
+    return -6;
   }
 
   if (!SSL_set1_host(ssl, components->host)) {
     printf("Failed to set the certificate verification hostname");
-    return -5;
+    return -7;
   }
 
   int ret = SSL_connect(ssl);
@@ -148,7 +156,7 @@ int make_https_request(struct URL_Components* components, char *message) {
     printf("Failed to connect to the server (%d)\n", ret);
 
     int err = SSL_get_error(ssl, ret);
-    
+
     return err;
   }
 

@@ -30,7 +30,7 @@ $(TARGET): $(OBJ_FILES) main.o
 
 # Rule to compile main.c
 main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) -g $(CFLAGS) -c main.c
 
 # Rule to compile source files
 $(OBJ_DIR)/%.o: $(LIB_DIR)/%.c | $(OBJ_DIR)

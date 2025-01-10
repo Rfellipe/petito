@@ -9,22 +9,17 @@
 #define MAX_MSG 1024
 
 /**
- * \brief generate standard get message
- * \param components URL components parsed with url_parser() function
- * \return char * get message
- */
-char *generate_get_request_message(struct URL_Components* components);
-
-/**
  * \brief generate standard post message
  * \param components URL components parsed with url_parser() function
+ * \param method HTTP method
  * \param headers headers to be used on the post request. obs: each headers need to end with "\r\n"
  * \param data data to be used on the post request
  * \param data_len length of the data that will be used on the post request
- * \return char * post message
+ * \return char * message with method chosed by user
  */
-char *generate_post_request_message(
-  struct URL_Components* components,
+char *generate_request_message(
+  struct URL_Components *url_components,
+  char *method,
   char *headers,
   char *data,
   size_t data_len

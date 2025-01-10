@@ -1,6 +1,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#define ARR_SIZE(x) (sizeof(x) / (sizeof(x)[0]))
+
 struct URL_Components {
   char* scheme;
   char* host;
@@ -39,5 +41,7 @@ struct URL_Components* url_parser(char *url);
 void free_url_components(struct URL_Components* components);
 
 void print_url_components(struct URL_Components* components);
+
+void upper_string(char *str);
 
 #endif
